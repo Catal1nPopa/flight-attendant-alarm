@@ -27,7 +27,7 @@ function AlarmCalculator() {
     let transportMinutes = transportType === "masina" ? 30 : 40;
 
     // 3. timp machiaj/pregatire in functie de ora zborului
-    let prepMinutes = (flightHours >= 8 && flightHours < 22) ? 80 : 60;
+   let prepMinutes = (flightHours >= 12 || flightHours < 2) ? 80 : 70;
 
     // 4. la ce ora trebuie sa iasa din casa
     let outFromHouse = new Date(flightDate.getTime() - (airportArrivalMinutes + transportMinutes) * 60000)
