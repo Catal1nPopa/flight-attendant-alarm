@@ -1,0 +1,1 @@
+body{margin:0;font-family:Roboto,sans-serif;height:100vh;overflow:hidden;position:relative}.background{position:fixed;inset:0;background-image:url(/assets/plane-BQ6W2gAH.jpg);background-size:cover;background-position:center;filter:blur(8px);z-index:0}.overlay{position:fixed;inset:0;background-color:#00000080;z-index:1}#root{position:relative;z-index:2}
