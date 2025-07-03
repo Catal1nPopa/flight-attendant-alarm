@@ -1,34 +1,47 @@
 import { useState } from "react";
-import { TextField, Button, Typography, Box, Paper } from "@mui/material";
+import { TextField, Button, Typography, Box, Paper, FormControl, FormLabel, RadioGroup, FormControlLabel, Radio } from "@mui/material";
 import FlightTakeoffIcon from '@mui/icons-material/FlightTakeoff';
 
 function AlarmCalculator() {
   const [flightTime, setFlightTime] = useState("");
-  const [prepTime, setPrepTime] = useState("");
+  const [planeType, setPlaneType] = useState(""); // "romanesc" sau "moldovenesc"
+  const [transportType, setTransportType] = useState(""); // "masina" sau "taxi"
   const [wakeUpTime, setWakeUpTime] = useState("");
+  const [getOutTime, setGetOutTime] = useState("");
 
   const calculateWakeUp = () => {
-    if (!flightTime || !prepTime) {
+    if (!flightTime || !planeType || !transportType) {
       setWakeUpTime("Completează toate câmpurile!");
       return;
     }
 
     const [flightHours, flightMinutes] = flightTime.split(":").map(Number);
-    const prepMinutes = parseInt(prepTime, 10);
 
     const flightDate = new Date();
-    flightDate.setHours(flightHours);
-    flightDate.setMinutes(flightMinutes);
-    flightDate.setSeconds(0);
+    flightDate.setHours(flightHours, flightMinutes, 0, 0);
 
-    const wakeUpDate = new Date(flightDate.getTime() - prepMinutes * 60000);
+    // 1. timp sosire aeroport
+    let airportArrivalMinutes = planeType === "romanesc" ? 80 : 60;
 
-    const formattedTime = wakeUpDate.toLocaleTimeString([], {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+    // 2. timp transport plecare de acasa
+    let transportMinutes = transportType === "masina" ? 30 : 40;
+
+    // 3. timp machiaj/pregatire in functie de ora zborului
+    let prepMinutes = (flightHours >= 8 && flightHours < 22) ? 80 : 60;
+
+    // 4. la ce ora trebuie sa iasa din casa
+    let outFromHouse = new Date(flightDate.getTime() - (airportArrivalMinutes + transportMinutes) * 60000)
+    const wakeUpDateFormatted = outFromHouse.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+
+    // total timp in minute
+    const totalPrepMinutes = airportArrivalMinutes + transportMinutes + prepMinutes;
+
+    const wakeUpDate = new Date(flightDate.getTime() - totalPrepMinutes * 60000);
+
+    const formattedTime = wakeUpDate.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 
     setWakeUpTime(`Trebuie să te trezești la: ${formattedTime}`);
+    setGetOutTime(`Trebuie să iesi la: ${wakeUpDateFormatted}`);
   };
 
   return (
@@ -58,16 +71,31 @@ function AlarmCalculator() {
           variant="outlined"
           InputLabelProps={{ shrink: true }}
         />
-        <TextField
-          fullWidth
-          label="Minute Pregătire"
-          type="number"
-          value={prepTime}
-          onChange={(e) => setPrepTime(e.target.value)}
-          margin="normal"
-          variant="outlined"
-          InputLabelProps={{ shrink: true }}
-        />
+
+        <FormControl component="fieldset" margin="normal">
+          <FormLabel component="legend">Tip avion</FormLabel>
+          <RadioGroup
+            row
+            value={planeType}
+            onChange={(e) => setPlaneType(e.target.value)}
+          >
+            <FormControlLabel value="romanesc" control={<Radio />} label="Românesc" />
+            <FormControlLabel value="moldovenesc" control={<Radio />} label="Moldovenesc" />
+          </RadioGroup>
+        </FormControl>
+
+        <FormControl component="fieldset" margin="normal">
+          <FormLabel component="legend">Transport</FormLabel>
+          <RadioGroup
+            row
+            value={transportType}
+            onChange={(e) => setTransportType(e.target.value)}
+          >
+            <FormControlLabel value="masina" control={<Radio />} label="Mașină" />
+            <FormControlLabel value="taxi" control={<Radio />} label="Taxi" />
+          </RadioGroup>
+        </FormControl>
+
         <Button
           fullWidth
           variant="contained"
@@ -79,6 +107,11 @@ function AlarmCalculator() {
         {wakeUpTime && (
           <Typography variant="body1" sx={{ mt: 3 }}>
             {wakeUpTime}
+          </Typography>
+        )}
+        {getOutTime && (
+          <Typography variant="body1" sx={{ mt: 3 }}>
+            {getOutTime}
           </Typography>
         )}
       </Paper>
