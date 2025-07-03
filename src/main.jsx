@@ -8,3 +8,15 @@ createRoot(document.getElementById('root')).render(
     <App />
   </StrictMode>,
 )
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/flight-attendant-alarm/sw.js')
+      .then(registration => {
+        console.log('Service Worker înregistrat:', registration)
+      })
+      .catch(error => {
+        console.log('Eroare Service Worker:', error)
+      })
+  })
+}
